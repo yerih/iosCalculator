@@ -8,6 +8,7 @@ export const CalculatorScreen = () => {
     const {
         number, 
         prevNum,
+        prevResult,
         formula,
         result,
 
@@ -26,10 +27,12 @@ export const CalculatorScreen = () => {
     <View style={styles.calculatorContainer}>
         <View style={{ paddingHorizontal: 20, paddingBottom: 5}}>
             <Text adjustsFontSizeToFit numberOfLines={1} style={styles.mainResult}>
-                {number}
+                {formula}
+                {/* {number} */}
             </Text>
             <Text adjustsFontSizeToFit numberOfLines={1} style={styles.subResult}>
-                { prevNum === '0' ? ' ': prevNum}
+                { prevResult === '0' ? ' ': prevResult}
+                {/* { prevNum === '0' ? ' ': prevNum} */}
                 {result}
             </Text>
         </View>

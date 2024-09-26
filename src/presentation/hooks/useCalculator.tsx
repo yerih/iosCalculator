@@ -14,6 +14,7 @@ export const useCalculator = () => {
   const [prevNum, setPrevNum] = useState('0')
   const [result, setResult] = useState('')
   const [formula, setFormula] = useState('')
+  const [prevResult, setPrevResult] = useState('')
 
   
   const lastOperation = useRef<Operator>()
@@ -36,7 +37,10 @@ export const useCalculator = () => {
     
   }  
 
-  const clear      = () => {setNumber('0'); setPrevNum('0'); setFormula('0'); }
+  const clear = () => {
+    setNumber('0'); setPrevNum('0'); setFormula('0'); setPrevResult('')
+    lastOperation.current = undefined; 
+  }
   const del        = () => {
     if(number.includes('-'))
       setNumber( number.length == 2 ? '0':number.slice(0,-1))
@@ -76,22 +80,38 @@ export const useCalculator = () => {
   }
 
   const calculateResult = (): number => {
-    
-    const num1 = Number(prevNum)
-    const num2 = Number(number)
-    switch(lastOperation.current){
-      case Operator.divide:   setNumber(`${num1/num2}`); break;
-      case Operator.multiply: setNumber(`${num1*num2}`); break;
-      case Operator.subtract: setNumber(`${num1-num2}`); break;
-      case Operator.add:      setNumber(`${num1+num2}`); break;//num1+num2
+    const result = calculateSubresult(formula)
+    setFormula(`${result}`)
+    lastOperation.current = undefined
+    setPrevNum('')
+    setPrevResult('')
+  }
+
+
+  const calculateSubresult = (toCalc: String): number => {
+    const [first, op, second] = toCalc.split(' ')
+    // const [first, op, second] = formula.split(' ')
+    const num1 = Number(first)
+    const num2 = Number(second)
+    switch(op){
+      case Operator.divide:   return num1/num2
+      case Operator.multiply: return num1*num2
+      case Operator.subtract: return num1-num2
+      case Operator.add:      return num1+num2
       default: return num2//throw new Error('calculateResult: Operation not implemented')
     }
-    setPrevNum('')
   }
 
   useEffect( () => {
-    if(lastOperation.current === undefined)
-      setFormula(number)
+    // if(lastOperation.current === undefined)
+    if(lastOperation.current){
+      const firstPart = formula.split(' ')[0]
+      let f = `${firstPart} ${lastOperation.current} ${number}`
+      setFormula(f)
+      setPrevResult(`${calculateSubresult(f)}`)
+    }
+    else 
+        setFormula(number)
   }, [number])
   
   
@@ -99,6 +119,7 @@ export const useCalculator = () => {
     //Properties
     number,
     prevNum,
+    prevResult,
     formula,
     result,
 
