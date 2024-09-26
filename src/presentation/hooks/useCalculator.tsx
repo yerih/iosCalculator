@@ -14,7 +14,6 @@ export const useCalculator = () => {
   const [prevNum, setPrevNum] = useState('0')
   const [result, setResult] = useState('')
   const [formula, setFormula] = useState('')
-  const [prevResult, setPrevResult] = useState('')
 
   
   const lastOperation = useRef<Operator>()
@@ -38,7 +37,7 @@ export const useCalculator = () => {
   }  
 
   const clear = () => {
-    setNumber('0'); setPrevNum('0'); setFormula('0'); setPrevResult('')
+    setNumber('0'); setPrevNum('0'); setFormula('0');
     lastOperation.current = undefined; 
   }
   const del        = () => {
@@ -53,6 +52,7 @@ export const useCalculator = () => {
   }
 
   const setLastNumber = () => {
+    calculateResult()
     if(number.endsWith('.')) setPrevNum(number.slice(0,-1))
     else setPrevNum(number)
     setNumber('0')
@@ -80,19 +80,18 @@ export const useCalculator = () => {
   }
 
   const calculateResult = (): number => {
-    const result = calculateSubresult(formula)
+    const result = calculateSubresult()
     setFormula(`${result}`)
     lastOperation.current = undefined
     setPrevNum('')
-    setPrevResult('')
   }
 
 
-  const calculateSubresult = (toCalc: String): number => {
-    const [first, op, second] = toCalc.split(' ')
-    // const [first, op, second] = formula.split(' ')
+  const calculateSubresult = (): number => {
+    const [first, op, second] = formula.split(' ')
     const num1 = Number(first)
     const num2 = Number(second)
+    if(isNaN(num2)) return num1
     switch(op){
       case Operator.divide:   return num1/num2
       case Operator.multiply: return num1*num2
@@ -106,20 +105,23 @@ export const useCalculator = () => {
     // if(lastOperation.current === undefined)
     if(lastOperation.current){
       const firstPart = formula.split(' ')[0]
-      let f = `${firstPart} ${lastOperation.current} ${number}`
-      setFormula(f)
-      setPrevResult(`${calculateSubresult(f)}`)
+      setFormula(`${firstPart} ${lastOperation.current} ${number}`)
     }
     else 
         setFormula(number)
   }, [number])
+
+  useEffect(
+    ()=>{
+      setPrevNum(`${calculateSubresult()}`)
+    }
+  , [formula])
   
   
   return {
     //Properties
     number,
     prevNum,
-    prevResult,
     formula,
     result,
 
